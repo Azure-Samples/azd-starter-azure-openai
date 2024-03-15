@@ -29,8 +29,8 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.4.0' = {
   }
 }
 
-module cogServiceDeploy 'app/cog-service-account-deployments.bicep' = {
-  name: 'openai-model-deploy'
+module cognitiveServiceAccountDeployments 'app/cognitive-service-account-deployments.bicep' = {
+  name: 'cognitive-service-account-deployments'
   scope: rg
   params: {
     openAiServiceName: openAi.outputs.name
