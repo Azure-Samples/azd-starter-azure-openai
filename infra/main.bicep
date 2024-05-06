@@ -18,7 +18,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module openAi 'br/public:avm/res/cognitive-services/account:0.4.0' = {
+module openAi 'br/public:avm/res/cognitive-services/account:0.5.2' = {
   name: 'openai-${resourceToken}'
   scope: rg
   params: {
@@ -26,14 +26,6 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.4.0' = {
     kind: 'OpenAI'
     name: 'openai-${resourceToken}'
     location: location
-  }
-}
-
-module cognitiveServiceAccountDeployments 'app/cognitive-service-account-deployments.bicep' = {
-  name: 'cognitive-service-account-deployments'
-  scope: rg
-  params: {
-    openAiServiceName: openAi.outputs.name
     deployments: [
       {
         name: 'Gpt35Turbo_0301'
@@ -41,6 +33,10 @@ module cognitiveServiceAccountDeployments 'app/cognitive-service-account-deploym
           format: 'OpenAI'
           name: 'gpt-35-turbo'
           version: '0301'
+        }
+        sku: {
+          name: 'Standard'
+          capacity: 10
         }
       }
       {
@@ -50,6 +46,10 @@ module cognitiveServiceAccountDeployments 'app/cognitive-service-account-deploym
           name: 'text-embedding-ada-002'
           version: '2'
         }
+        sku: {
+          name: 'Standard'
+          capacity: 10
+        }
       }
       {
         name: 'Gpt35Turbo_16k'
@@ -57,6 +57,10 @@ module cognitiveServiceAccountDeployments 'app/cognitive-service-account-deploym
           format: 'OpenAI'
           name: 'gpt-35-turbo-16k'
           version: '0613'
+        }
+        sku: {
+          name: 'Standard'
+          capacity: 10
         }
       }
     ]
