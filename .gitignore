@@ -1,2 +1,5 @@
 .azure
 .env
+
+**/bin/
+**/obj/
