@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Identity;
 using Azure.AI.OpenAI;
 using System;
 using System.Net;
@@ -25,22 +26,21 @@ namespace ChatApp
 
         static async Task StreamingChatWithData(string Message)
         {
-            #region Snippet:StreamChatMessages
-            Uri azureOpenAIResourceUri = new Uri(Environment.GetEnvironmentVariable("AZURE_OPENAI_RESOURCE_URI"));
-            AzureKeyCredential azureOpenAIApiKey = new AzureKeyCredential(Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"));
-            OpenAIClient client = new OpenAIClient(azureOpenAIResourceUri, azureOpenAIApiKey);
+            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
+            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+            OpenAIClient client = new OpenAIClient(new Uri(azureOpenAIEndpoint), new AzureKeyCredential(azureOpenAIKey));
 
-            
             AzureSearchChatExtensionConfiguration contosoExtensionConfig = new()
             {
-                SearchEndpoint = new Uri("https://your-contoso-search-resource.search.windows.net"),
-                Authentication = new OnYourDataApiKeyAuthenticationOptions("<your Cognitive Search resource API key>"),
+                SearchEndpoint = new Uri(Environment.GetEnvironmentVariable("AZURE_SEARCH_ENDPOINT")),
+                Authentication = new OnYourDataApiKeyAuthenticationOptions(Environment.GetEnvironmentVariable("AZURE_SEARCH_KEY")),
+                IndexName = "index",
             };
 
 
             var chatCompletionsOptions = new ChatCompletionsOptions()
             {
-                DeploymentName = "gpt-4", // Use DeploymentName for "model" with non-Azure clients
+                DeploymentName = "Gpt35Turbo_0301", // Use DeploymentName for "model" with non-Azure clients
                 Messages =
                 {
                     new ChatRequestSystemMessage("You are an AI assistant that helps people find information."),
@@ -55,24 +55,42 @@ namespace ChatApp
                 }
             };
             // Download a document and add all of its contents to our chat
-            using (HttpClient httpClient = new())
+            // using (HttpClient httpClient = new())
+            // {
+            //     string s = await httpClient.GetStringAsync("https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7");
+            //     s = WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", ""));
+            //     chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage("Here's some additional information: " + s)); // uh oh!
+            // }
+            // await foreach (StreamingChatCompletionsUpdate chatUpdate in client.GetChatCompletionsStreaming(chatCompletionsOptions))
+            // {
+            //     if (chatUpdate.Role.HasValue)
+            //     {
+            //         Console.Write($"{chatUpdate.Role.Value.ToString().ToUpperInvariant()}: ");
+            //     }
+            //     if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
+            //     {
+            //         Console.Write(chatUpdate.ContentUpdate);
+            //     }
+            // }
+            Response<ChatCompletions> response = await client.GetChatCompletionsAsync(chatCompletionsOptions);
+            ChatResponseMessage message = response.Value.Choices[0].Message;
+
+            // The final, data-informed response still appears in the ChatMessages as usual
+            Console.WriteLine($"{message.Role}: {message.Content}");
+
+            // Responses that used extensions will also have Context information to explain extension activity
+            // and provide supplemental information like citations.
+            if (message.AzureExtensionsContext.Intent != "[]")
             {
-                string s = await httpClient.GetStringAsync("https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7");
-                s = WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", ""));
-                chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage("Here's some additional information: " + s)); // uh oh!
-            }
-            await foreach (StreamingChatCompletionsUpdate chatUpdate in client.GetChatCompletionsStreaming(chatCompletionsOptions))
-            {
-                if (chatUpdate.Role.HasValue)
+                Console.WriteLine($"Citations and other information:");
+                foreach (AzureChatExtensionDataSourceResponseCitation citation in message.AzureExtensionsContext.Citations)
                 {
-                    Console.Write($"{chatUpdate.Role.Value.ToString().ToUpperInvariant()}: ");
+                    Console.WriteLine($"Citation: {citation.Content}");
                 }
-                if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
-                {
-                    Console.Write(chatUpdate.ContentUpdate);
-                }
+                Console.WriteLine($"Intent: {message.AzureExtensionsContext.Intent}");
             }
-            #endregion
+
+            
         }
     }
 }
