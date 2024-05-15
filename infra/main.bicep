@@ -39,25 +39,25 @@ module openAI 'br/public:ai/cognitiveservices:1.1.1' = {
         }
       }
       {
-        name: 'TextEmbeddingAda002_1'
+        name: 'TextEmbedding3'
         properties: {
           model: {
             format: 'OpenAI'
-            name: 'text-embedding-ada-002'
-            version: '2'
+            name: 'text-embedding-3-large'
+            version: '1'
           }
         }
       }
-      {
-        name: 'Gpt35Turbo_16k'
-        properties: {
-          model: {
-            format: 'OpenAI'
-            name: 'gpt-35-turbo-16k'
-            version: '0613'
-          }
-        }
-      }
+      // {
+      //   name: 'Gpt35Turbo_16k'
+      //   properties: {
+      //     model: {
+      //       format: 'OpenAI'
+      //       name: 'gpt-35-turbo-16k'
+      //       version: '0613'
+      //     }
+      //   }
+      // }
     ]
   }
 }
@@ -75,8 +75,19 @@ module searchService 'br/public:search/search-service:1.0.2' = {
   }
 }
 
+module getKey './app/getkey.bicep' = {
+  name: 'get-key'
+  scope: group
+  params: {
+    azureOpenAIName: openAI.outputs.name
+    azureAISearchName: searchService.outputs.name
+  }
+}
+
 output AZURE_LOCATION string = location
 output AZURE_RESOURCE_GROUP string = group.name
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_OPENAI_ENDPOINT string = openAI.outputs.endpoint
 output AZURE_SEARCH_ENDPOINT string = searchService.outputs.endpoint
+output AZURE_OPENAI_API_KEY string = getKey.outputs.openAIKey
+output AZURE_SEARCH_KEY string = getKey.outputs.searchKey

@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Identity;
 using Azure.AI.OpenAI;
 using DotNetEnv;
 using System;
@@ -24,13 +25,13 @@ namespace ChatApp
 
         static async Task<string> ChatCompletions(string Message)
         {
-            Uri azureOpenAIResourceUri = new Uri(Environment.GetEnvironmentVariable("AZURE_OPENAI_RESOURCE_URI"));
-            AzureKeyCredential azureOpenAIApiKey = new AzureKeyCredential(Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"));
-            OpenAIClient client = new OpenAIClient(azureOpenAIResourceUri, azureOpenAIApiKey);
+            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
+            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+            OpenAIClient client = new OpenAIClient(new Uri(azureOpenAIEndpoint), new AzureKeyCredential(azureOpenAIKey));
 
             var chatCompletionsOptions = new ChatCompletionsOptions()
             {
-                DeploymentName = "gpt-4", // Use DeploymentName for "model" with non-Azure clients
+                DeploymentName = "Gpt35Turbo_0301", // Use DeploymentName for "model" with non-Azure clients
                 Messages =
                 {
                     new ChatRequestSystemMessage("You are an AI assistant that helps people find information."),

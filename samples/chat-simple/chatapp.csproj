@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.17" />
+    <PackageReference Include="Azure.Identity" Version="1.11.3" />
     <PackageReference Include="DotNetEnv" Version="3.0.0" />
   </ItemGroup>
 

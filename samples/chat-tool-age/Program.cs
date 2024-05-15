@@ -28,16 +28,21 @@ namespace ChatApp
 
         static async Task<string> ChatCompletions(string Message)
         {
-          var getTimeTool = new ChatCompletionsFunctionToolDefinition()
+          var getPersonAge = new ChatCompletionsFunctionToolDefinition()
           {
-              Name = "get_current_time",
-              Description = "Get the current time",
+              Name = "get_person_age",
+              Description = "Gets the age of the named person",
               Parameters = BinaryData.FromObjectAsJson(
               new
               {
                   Type = "object",
                   Properties = new
                   {
+                    name = new
+                    {
+                        Type = "string",
+                        Description = "The name of the person",
+                    },
                       // Location = new
                       // {
                       //     Type = "string",
@@ -54,6 +59,8 @@ namespace ChatApp
               new JsonSerializerOptions() {  PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
           };
 
+
+
             string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
             string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
             OpenAIClient client = new OpenAIClient(new Uri(azureOpenAIEndpoint), new AzureKeyCredential(azureOpenAIKey));
@@ -69,7 +76,7 @@ namespace ChatApp
                     new ChatRequestAssistantMessage("Of course, I'd be happy to help. What can I do for you?"),
                     new ChatRequestUserMessage(Message),
                 },
-                Tools = { getTimeTool },
+                Tools = { getPersonAge },
             };
 
             Response<ChatCompletions> response = await client.GetChatCompletionsAsync(chatCompletionsOptions);
@@ -81,13 +88,28 @@ namespace ChatApp
             ChatRequestToolMessage GetToolCallResponseMessage(ChatCompletionsToolCall toolCall)
             {
                 var functionToolCall = toolCall as ChatCompletionsFunctionToolCall;
-                if (functionToolCall?.Name == getTimeTool.Name)
+                if (functionToolCall?.Name == getPersonAge.Name)
                 {
                     // Validate and process the JSON arguments for the function call
-                    string unvalidatedArguments = functionToolCall.Arguments;
+                    var unvalidatedArguments = functionToolCall.Arguments;
                     var functionResultData = (object)null; // GetYourFunctionResultData(unvalidatedArguments);
                     // Here, replacing with an example as if returned from "GetYourFunctionResultData"
-                    functionResultData = DateTime.Now.ToString();
+                    
+                    var argumentsDict = JsonSerializer.Deserialize<Dictionary<string, object>>(functionToolCall.Arguments.ToString());
+                    string name = argumentsDict["name"].ToString();
+                    switch (name)
+                    {
+                        case "Elsa":
+                            functionResultData = 21;
+                            break;
+                        case "Anna":
+                            functionResultData = 18;
+                            break;
+                        default:
+                            functionResultData = "Unknown";
+                            break;
+                    }
+                    
                     return new ChatRequestToolMessage(functionResultData.ToString(), toolCall.Id);
                 }
                 else
@@ -120,7 +142,4 @@ namespace ChatApp
         }
     }
 }
-
-
-
 
