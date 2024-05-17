@@ -31,13 +31,13 @@ namespace ChatApp
 
         static async Task<string> ChatCompletions(string Message)  
         {  
-            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
-            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!;
+            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!;
             OpenAIClient client = new OpenAIClient(new Uri(azureOpenAIEndpoint), new AzureKeyCredential(azureOpenAIKey));
 
             var chatCompletionsOptions = new ChatCompletionsOptions()  
             {  
-                DeploymentName = "Gpt35Turbo_0301", // Use DeploymentName for "model" with non-Azure clients  
+                DeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL"), // Use DeploymentName for "model" with non-Azure clients  
             };  
             
             // Add the previous chat history to the Messages list  

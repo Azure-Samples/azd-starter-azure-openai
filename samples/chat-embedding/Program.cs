@@ -47,13 +47,13 @@ namespace ChatApp
         
         static async Task<float[]> ChatCompletions(string Message)
         {
-            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
-            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!;
+            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!;
             OpenAIClient client = new OpenAIClient(new Uri(azureOpenAIEndpoint), new AzureKeyCredential(azureOpenAIKey));
 
             EmbeddingsOptions embeddingsOptions = new()
             {
-                DeploymentName = "TextEmbedding3",
+                DeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_MODEL")!,
                 Input = { Message },
             };
             Response<Embeddings> response = await client.GetEmbeddingsAsync(embeddingsOptions);
