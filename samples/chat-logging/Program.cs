@@ -57,7 +57,12 @@ using (HttpClient client = new())
                 128),
             1024);
     for (int i = 0; i < paragraphs.Count; i++)
+    {
+        Console.WriteLine($"Saving paragraph {i} of {paragraphs.Count}");
+        // sleep for a bit to avoid rate limiting
+        await Task.Delay(TimeSpan.FromSeconds(3)); 
         await memory.SaveInformationAsync(collectionName, paragraphs[i], $"paragraph{i}");
+    }
 }
 
 // Create a new chat

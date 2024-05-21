@@ -62,8 +62,12 @@ else
                 WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", "")),
                 128),
             1024);
-    for (int i = 0; i < paragraphs.Count; i++)
+    for (int i = 0; i < paragraphs.Count; i++){
+        // sleep for a bit to avoid rate limiting
+        await Task.Delay(TimeSpan.FromSeconds(3)); 
         await memory.SaveInformationAsync(collectionName, paragraphs[i], $"paragraph{i}");
+    }
+        
     Console.WriteLine("Generated database");
 }
 
