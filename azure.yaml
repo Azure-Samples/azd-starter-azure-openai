@@ -8,11 +8,11 @@ hooks:
   postprovision:
     posix: 
       shell: sh
-      run: azd env get-values | grep -i 'ENDPOINT'
+      run: infra\hooks\postprovision.sh
       interactive: true
-      continueOnError: true
+      continueOnError: false
     windows:
       shell: pwsh
-      run: azd env get-values | Where-Object { $_ -match "ENDPOINT" }
+      run: infra\hooks\postprovision.ps1
       interactive: true
-      continueOnError: true
+      continueOnError: false
