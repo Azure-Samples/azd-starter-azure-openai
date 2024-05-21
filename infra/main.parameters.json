@@ -8,8 +8,17 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "principalId": {
-      "value": "${AZURE_PRINCIPAL_ID}"
+    "openAiHost": {
+      "value": "${OPENAI_HOST}"
+    },
+    "openAiApiKey": {
+      "value": "${OPENAI_API_KEY}"
+    },
+    "openAiModel": {
+      "value": "${OPENAI_MODEL}"
+    },
+    "openAiEmbeddingModel": {
+      "value": "${OPENAI_EMBEDDING_MODEL}"
     }
   }
 }
