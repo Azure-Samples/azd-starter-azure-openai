@@ -35,7 +35,7 @@ var tags = { 'azd-env-name': environmentName }
 
 
 // Organize resources in a resource group 
-resource group 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'rg-${environmentName}'
   location: location
   tags: tags
@@ -43,10 +43,9 @@ resource group 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 module openAi 'br/public:ai/cognitiveservices:1.1.1' = {
   name: 'openai'
-  scope: group
+  scope: rg
   params: {
     tags: tags
-    skuName: 'S0'
     kind: 'OpenAI'
     name: 'openai-${resourceToken}'
     location: location
