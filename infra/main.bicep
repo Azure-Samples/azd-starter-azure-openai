@@ -75,7 +75,7 @@ module openAi 'br/public:ai/cognitiveservices:1.1.1' = {
 }
 
 output AZURE_LOCATION string = location
-output AZURE_RESOURCE_GROUP string = group.name
+output AZURE_RESOURCE_GROUP string = rg.name
 output OPENAI_HOST string = openAiHost
 output AZURE_OPENAI_ENDPOINT string = (openAiHost == 'azure') ? openAi.outputs.endpoint: ''
 output AZURE_OPENAI_SERVICE string = (openAiHost == 'azure') ? openAi.outputs.name: ''
