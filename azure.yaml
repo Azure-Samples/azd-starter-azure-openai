@@ -8,11 +8,11 @@ hooks:
   postprovision:
     posix: 
       shell: sh
-      run: azd env get-values > .env
+      run: infra\hooks\postprovision.sh
       interactive: true
       continueOnError: false
     windows:
       shell: pwsh
-      run: azd env get-values > .env
+      run: infra\hooks\postprovision.ps1
       interactive: true
       continueOnError: false

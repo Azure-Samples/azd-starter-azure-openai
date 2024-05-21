@@ -24,12 +24,12 @@ param azureOpenAIEmbeddingModelName string = 'text-embedding-ada-002'
 
 param azureOpenAIEmbeddingModelVersion string = '2'
 
-param keyVaultName string = ''
+@allowed(['azure', 'openai'])
+param openAiHost string 
+param openAiApiKey string = ''
+param openAiModel string = ''
+param openAiEmbeddingModel string = ''
 
-@description('Id of the user or app to assign application roles')
-param principalId string = ''
-
-var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
 
@@ -41,7 +41,7 @@ resource group 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module openAI 'br/public:ai/cognitiveservices:1.1.1' = {
+module openAi 'br/public:ai/cognitiveservices:1.1.1' = {
   name: 'openai'
   scope: group
   params: {
@@ -71,79 +71,20 @@ module openAI 'br/public:ai/cognitiveservices:1.1.1' = {
           }
         }
       }
-      // {
-      //   name: 'Gpt35Turbo_16k'
-      //   properties: {
-      //     model: {
-      //       format: 'OpenAI'
-      //       name: 'gpt-35-turbo-16k'
-      //       version: '0613'
-      //     }
-      //   }
-      // }
     ]
   }
 }
 
-module searchService 'br/public:search/search-service:1.0.2' = {
-  name: 'search-service'
-  scope: group
-  params: {
-    name: 'search-${resourceToken}'
-    location: location
-    tags: tags
-    sku: {
-      name: 'free'
-    }
-  }
-}
 
-module getKey './app/getkey.bicep' = {
-  name: 'get-key'
-  scope: group
-  params: {
-    azureOpenAIName: openAI.outputs.name
-    azureAISearchName: searchService.outputs.name
-  }
-}
-
-// Store secrets in a keyvault
-module keyVault 'br/public:avm/res/key-vault/vault:0.3.5' = {
-  name: 'keyvault'
-  scope: group
-  params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
-    location: location
-    tags: tags
-    accessPolicies: [
-      {
-        objectId: principalId
-        permissions: {
-          secrets: [ 'get', 'list' ]
-        }
-      }
-    ]
-    secrets: {
-      secureList: [
-        {
-          name: 'AZURE-OPENAI-API-KEY'
-          value: getKey.outputs.openAIKey
-        }
-        {
-          name: 'AZURE-SEARCH-KEY'
-          value: getKey.outputs.searchKey
-        }
-      ]
-    }
-  }
-}
 
 output AZURE_LOCATION string = location
 output AZURE_RESOURCE_GROUP string = group.name
-output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_OPENAI_ENDPOINT string = openAI.outputs.endpoint
-output AZURE_SEARCH_ENDPOINT string = searchService.outputs.endpoint
-output AZURE_OPENAI_API_KEY string = getKey.outputs.openAIKey
-output AZURE_SEARCH_KEY string = getKey.outputs.searchKey
-output AZURE_OPENAI_MODEL string = azureOpenAIModelName
-output AZURE_OPENAI_EMBEDDING_MODEL string = azureOpenAIEmbeddingModelName
+output OPENAI_HOST string = openAiHost
+output AZURE_OPENAI_ENDPOINT string = (openAiHost == 'azure') ? openAi.outputs.endpoint: ''
+output AZURE_OPENAI_SERVICE string = (openAiHost == 'azure') ? openAi.outputs.name: ''
+output AZURE_OPENAI_MODEL string = (openAiHost == 'azure') ? azureOpenAIModelName: ''
+output AZURE_OPENAI_EMBEDDING_MODEL string = (openAiHost == 'azure') ? azureOpenAIEmbeddingModelName: ''
+
+output OPENAI_API_KEY string = (openAiHost == 'openai') ? openAiApiKey : ''
+output OPENAI_MODEL string = (openAiHost == 'openai') ? openAiModel : ''
+output OPENAI_EMBEDDING_MODEL string = (openAiHost == 'openai') ? openAiEmbeddingModel : ''

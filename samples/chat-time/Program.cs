@@ -1,5 +1,4 @@
 ﻿using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
 
 // Read the environment variable
 DotNetEnv.Env.Load("../../.env");
@@ -20,19 +19,25 @@ else{
 }
 
 
-// Create a new chat
-IChatCompletionService ai = kernel.GetRequiredService<IChatCompletionService>();
-ChatHistory chat = new("You are an AI assistant that helps people find information.");
+// Create the prompt function as part of a plugin and add it to the kernel.
+// These operations can be done separately, but helpers also enable doing
+// them in one step.
+kernel.ImportPluginFromFunctions("DateTimeHelpers",
+[
+    kernel.CreateFunctionFromMethod(() => $"{DateTime.UtcNow:r}", "Now", "Gets the current date and time")
+]);
+
+KernelFunction qa = kernel.CreateFunctionFromPrompt("""
+    The current date and time is {{ datetimehelpers.now }}.
+    {{ $input }}
+    """);
 
 // Q&A loop
+var arguments = new KernelArguments();
 while (true)
 {
     Console.Write("Question: ");
-    chat.AddUserMessage(Console.ReadLine()!);
-
-    var answer = await ai.GetChatMessageContentAsync(chat);
-    chat.AddAssistantMessage(answer.Content!);
-    Console.WriteLine(answer);
-
+    arguments["input"] = Console.ReadLine();
+    Console.WriteLine(await qa.InvokeAsync(kernel, arguments));
     Console.WriteLine();
 }

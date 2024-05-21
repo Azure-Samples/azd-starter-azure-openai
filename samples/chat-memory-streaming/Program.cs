@@ -1,6 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-
+using System.Text;
 // Read the environment variable
 DotNetEnv.Env.Load("../../.env");
 
@@ -23,6 +23,7 @@ else{
 // Create a new chat
 IChatCompletionService ai = kernel.GetRequiredService<IChatCompletionService>();
 ChatHistory chat = new("You are an AI assistant that helps people find information.");
+StringBuilder builder = new();
 
 // Q&A loop
 while (true)
@@ -30,9 +31,14 @@ while (true)
     Console.Write("Question: ");
     chat.AddUserMessage(Console.ReadLine()!);
 
-    var answer = await ai.GetChatMessageContentAsync(chat);
-    chat.AddAssistantMessage(answer.Content!);
-    Console.WriteLine(answer);
+    builder.Clear();
+    await foreach (StreamingChatMessageContent message in ai.GetStreamingChatMessageContentsAsync(chat))
+    {
+        Console.Write(message);
+        builder.Append(message.Content);
+    }
+    Console.WriteLine();
+    chat.AddAssistantMessage(builder.ToString());
 
     Console.WriteLine();
 }

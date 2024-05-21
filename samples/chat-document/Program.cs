@@ -1,68 +1,54 @@
-﻿using Azure;
-using Azure.Identity;
-using Azure.AI.OpenAI;
-using System;
+﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace ChatApp
-{
-    class Program
-    {
-        static async Task Main(string[] args)
-        {
-            // Read the environment variable
-            DotNetEnv.Env.Load("../../.env");
-            
-            // Q&A loop
-            while (true)
-            {
-                Console.Write("Question: ");
-                await StreamingChatWithDocument(Console.ReadLine()!);
-                Console.WriteLine();
-            }
-        }
+// Read the environment variable
+DotNetEnv.Env.Load("../../.env");
 
-        static async Task StreamingChatWithDocument(string Message)
-        {
-            string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!;
-            string azureOpenAIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!;
-            OpenAIClient client = new OpenAIClient(new Uri(azureOpenAIEndpoint), new AzureKeyCredential(azureOpenAIKey));
+string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
 
-            var chatCompletionsOptions = new ChatCompletionsOptions()
-            {
-                DeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL"), // Use DeploymentName for "model" with non-Azure clients
-                Messages =
-                {
-                    new ChatRequestSystemMessage("You are an AI assistant that helps people find information."),
-                    new ChatRequestUserMessage("Can you help me?"),
-                    new ChatRequestAssistantMessage("Of course, I'd be happy to help. What can I do for you?"),
-                    new ChatRequestUserMessage(Message),
-                }
-            };
-            // Download a document and add all of its contents to our chat
-            using (HttpClient httpClient = new())
-            {
-                string s = await httpClient.GetStringAsync("https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7");
-                s = WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", ""));
-                chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage("Here's some additional information: " + s)); // uh oh!
-            }
-            await foreach (StreamingChatCompletionsUpdate chatUpdate in client.GetChatCompletionsStreaming(chatCompletionsOptions))
-            {
-                if (chatUpdate.Role.HasValue)
-                {
-                    Console.Write($"{chatUpdate.Role.Value.ToString().ToUpperInvariant()}: ");
-                }
-                if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
-                {
-                    Console.Write(chatUpdate.ContentUpdate);
-                }
-            }
-        }
-    }
+// Initialize the kernel
+Kernel kernel;
+if (OPENAI_HOST == "azure"){
+    kernel = Kernel.CreateBuilder()
+        .AddAzureOpenAIChatCompletion(Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL")!, Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!, Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!)
+        .Build();
+}
+else{
+    kernel = Kernel.CreateBuilder()
+        .AddOpenAIChatCompletion(Environment.GetEnvironmentVariable("OPENAI_MODEL")!,Environment.GetEnvironmentVariable("OPENAI_API_KEY")!)
+        .Build();
 }
 
+// Create a new chat
+IChatCompletionService ai = kernel.GetRequiredService<IChatCompletionService>();
+ChatHistory chat = new("You are an AI assistant that helps people find information.");
+StringBuilder builder = new();
 
+// Download a document and add all of its contents to our chat
+using (HttpClient client = new())
+{
+    string s = await client.GetStringAsync("https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7");
+    s = WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", ""));
+    chat.AddUserMessage("Here's some additional information: " + s); // uh oh!
+}
 
+// Q&A loop
+while (true)
+{
+    Console.Write("Question: ");
+    chat.AddUserMessage(Console.ReadLine()!);
 
+    builder.Clear();
+    await foreach (var message in ai.GetStreamingChatMessageContentsAsync(chat))
+    {
+        Console.Write(message);
+        builder.Append(message.Content);
+    }
+    Console.WriteLine();
+    chat.AddAssistantMessage(builder.ToString());
+
+    Console.WriteLine();
+}
