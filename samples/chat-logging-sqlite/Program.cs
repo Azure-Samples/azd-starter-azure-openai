@@ -23,7 +23,7 @@ if (OPENAI_HOST == "azure"){
     IKernelBuilder kb = Kernel.CreateBuilder();
     kb.AddAzureOpenAIChatCompletion(Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL")!, Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!, Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
     kb.Services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Trace));
-    // kb.Services.ConfigureHttpClientDefaults(c => c.AddStandardResilienceHandler());
+    kb.Services.ConfigureHttpClientDefaults(c => c.AddStandardResilienceHandler());
     kernel = kb.Build();
     
     memory = new MemoryBuilder()
@@ -36,7 +36,7 @@ else{
     IKernelBuilder kb = Kernel.CreateBuilder();
     kb.AddOpenAIChatCompletion(Environment.GetEnvironmentVariable("AZURE_OPENAI_MODEL")!, Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!, Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
     kb.Services.AddLogging(c => c.AddConsole().SetMinimumLevel(LogLevel.Trace));
-    // kb.Services.ConfigureHttpClientDefaults(c => c.AddStandardResilienceHandler());
+    kb.Services.ConfigureHttpClientDefaults(c => c.AddStandardResilienceHandler());
     kernel = kb.Build();
 
     memory = new MemoryBuilder()
