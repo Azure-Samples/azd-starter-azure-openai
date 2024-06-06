@@ -41,7 +41,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module openAi 'br/public:ai/cognitiveservices:1.1.1' = {
+module openAi 'br/public:avm/res/cognitive-services/account:0.5.3' = {
   name: 'openai'
   scope: rg
   params: {
@@ -49,25 +49,31 @@ module openAi 'br/public:ai/cognitiveservices:1.1.1' = {
     kind: 'OpenAI'
     name: 'openai-${resourceToken}'
     location: location
+    disableLocalAuth: false
+    publicNetworkAccess: 'Enabled'
     deployments: [
       {
         name: azureOpenAIModelName
-        properties: {
-          model: {
-            format: 'OpenAI'
-            name: azureOpenAIModel
-            version: azureOpenAIModelVersion
-          }
+        model: {
+          format: 'OpenAI'
+          name: azureOpenAIModel
+          version: azureOpenAIModelVersion
+        }
+        sku: {
+          capacity: 10
+          name: 'Standard'
         }
       }
       {
         name: azureOpenAIEmbeddingModelName
-        properties: {
-          model: {
-            format: 'OpenAI'
-            name: azureOpenAIEmbeddingModel
-            version: azureOpenAIEmbeddingModelVersion
-          }
+        model: {
+          format: 'OpenAI'
+          name: azureOpenAIEmbeddingModel
+          version: azureOpenAIEmbeddingModelVersion
+        }
+        sku: {
+          capacity: 10
+          name: 'Standard'
         }
       }
     ]

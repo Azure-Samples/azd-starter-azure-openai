@@ -1,6 +1,6 @@
 using 'main.bicep'
 
-param environmentName = readEnvironmentVariable('AZURE_ENV_NAME', 'drda')
+param environmentName = readEnvironmentVariable('AZURE_ENV_NAME', '')
 param location = readEnvironmentVariable('AZURE_LOCATION', 'eastus')
 param openAiHost = readEnvironmentVariable('OPENAI_HOST', 'azure')
 param openAiApiKey = readEnvironmentVariable('OPENAI_API_KEY', '')
