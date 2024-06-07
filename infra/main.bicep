@@ -27,8 +27,8 @@ param azureOpenAIEmbeddingModelVersion string = '2'
 @allowed(['azure', 'openai'])
 param openAiHost string 
 param openAiApiKey string = ''
-param openAiModel string = ''
-param openAiEmbeddingModel string = ''
+param openAiModel string = 'gpt-35-turbo'
+param openAiEmbeddingModel string = 'text-embedding-ada-002'
 
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
