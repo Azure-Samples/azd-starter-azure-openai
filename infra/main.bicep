@@ -8,25 +8,24 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
-@description('Azure OpenAI Model Deployment Name')
-param azureOpenAIModel string = 'gpt-35-turbo'
+@description('Azure OpenAi Model Deployment Name')
+param azureOpenAiModel string = 'gpt-35-turbo'
 
-@description('Azure OpenAI Model Name')
-param azureOpenAIModelName string = 'gpt-35-turbo'
+@description('Azure OpenAi Model Name')
+param azureOpenAiModelName string = 'gpt-35-turbo'
 
-param azureOpenAIModelVersion string = '0613'
+param azureOpenAiModelVersion string = '0613'
 
-@description('Azure OpenAI Embedding Model Deployment Name')
-param azureOpenAIEmbeddingModel string = 'text-embedding-ada-002'
+@description('Azure OpenAi Embedding Model Deployment Name')
+param azureOpenAiEmbeddingModel string = 'text-embedding-ada-002'
 
-@description('Azure OpenAI Embedding Model Name')
-param azureOpenAIEmbeddingModelName string = 'text-embedding-ada-002'
+@description('Azure OpenAi Embedding Model Name')
+param azureOpenAiEmbeddingModelName string = 'text-embedding-ada-002'
 
-param azureOpenAIEmbeddingModelVersion string = '2'
+param azureOpenAiEmbeddingModelVersion string = '2'
 
 @allowed(['azure', 'openai'])
 param openAiHost string 
-param openAiApiKey string = ''
 param openAiModel string = ''
 param openAiEmbeddingModel string = ''
 
@@ -53,11 +52,11 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.5.3' = {
     publicNetworkAccess: 'Enabled'
     deployments: [
       {
-        name: azureOpenAIModelName
+        name: azureOpenAiModelName
         model: {
           format: 'OpenAI'
-          name: azureOpenAIModel
-          version: azureOpenAIModelVersion
+          name: azureOpenAiModel
+          version: azureOpenAiModelVersion
         }
         sku: {
           capacity: 10
@@ -65,11 +64,11 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.5.3' = {
         }
       }
       {
-        name: azureOpenAIEmbeddingModelName
+        name: azureOpenAiEmbeddingModelName
         model: {
           format: 'OpenAI'
-          name: azureOpenAIEmbeddingModel
-          version: azureOpenAIEmbeddingModelVersion
+          name: azureOpenAiEmbeddingModel
+          version: azureOpenAiEmbeddingModelVersion
         }
         sku: {
           capacity: 10
@@ -85,9 +84,8 @@ output AZURE_RESOURCE_GROUP string = rg.name
 output OPENAI_HOST string = openAiHost
 output AZURE_OPENAI_ENDPOINT string = (openAiHost == 'azure') ? openAi.outputs.endpoint: ''
 output AZURE_OPENAI_SERVICE string = (openAiHost == 'azure') ? openAi.outputs.name: ''
-output AZURE_OPENAI_MODEL string = (openAiHost == 'azure') ? azureOpenAIModelName: ''
-output AZURE_OPENAI_EMBEDDING_MODEL string = (openAiHost == 'azure') ? azureOpenAIEmbeddingModelName: ''
+output AZURE_OPENAI_MODEL string = (openAiHost == 'azure') ? azureOpenAiModelName: ''
+output AZURE_OPENAI_EMBEDDING_MODEL string = (openAiHost == 'azure') ? azureOpenAiEmbeddingModelName: ''
 
-output OPENAI_API_KEY string = (openAiHost == 'openai') ? openAiApiKey : ''
 output OPENAI_MODEL string = (openAiHost == 'openai') ? openAiModel : ''
 output OPENAI_EMBEDDING_MODEL string = (openAiHost == 'openai') ? openAiEmbeddingModel : ''
