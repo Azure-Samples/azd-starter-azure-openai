@@ -1,7 +1,10 @@
 ﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using LoadEnvVariables;
 
 // Read the environment variable
-DotNetEnv.Env.Load("../../.env");
+var env = new AzureEnvManager();
+env.LoadEnvVariables();
 
 string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
 
@@ -19,10 +22,19 @@ else{
 }
 
 
+// Create a new chat
+IChatCompletionService ai = kernel.GetRequiredService<IChatCompletionService>();
+ChatHistory chat = new("You are an AI assistant that helps people find information.");
+
 // Q&A loop
 while (true)
 {
     Console.Write("Question: ");
-    Console.WriteLine(await kernel.InvokePromptAsync(Console.ReadLine()!));
+    chat.AddUserMessage(Console.ReadLine()!);
+
+    var answer = await ai.GetChatMessageContentAsync(chat);
+    chat.AddAssistantMessage(answer.Content!);
+    Console.WriteLine(answer);
+
     Console.WriteLine();
 }

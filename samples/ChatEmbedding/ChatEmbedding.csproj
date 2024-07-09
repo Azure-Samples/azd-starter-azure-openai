@@ -10,6 +10,11 @@
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.0.0" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.13.0" />
+    <PackageReference Include="System.Numerics.Tensors" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\LoadEnvVariables\LoadEnvVariables.csproj" />
   </ItemGroup>
 
 </Project>

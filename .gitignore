@@ -1,5 +1,10 @@
+# Folder
 .azure
-.env
+.vs
 
+# Solution file
+*.sln
+
+# CSharp related 
 **/bin/
 **/obj/

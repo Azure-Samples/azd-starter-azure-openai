@@ -8,11 +8,13 @@ using Microsoft.SemanticKernel.Text;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using LoadEnvVariables;
 
 #pragma warning disable SKEXP0001, SKEXP0003, SKEXP0010, SKEXP0050, SKEXP0055 // Experimental
 
 // Read the environment variable
-DotNetEnv.Env.Load("../../.env");
+var env = new AzureEnvManager();
+env.LoadEnvVariables();
 
 string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
 
@@ -46,9 +48,15 @@ else{
         .Build();
 }
 
+IList<string> collections = await memory.GetCollectionsAsync();
 string collectionName = "net7perf";
-using (HttpClient client = new())
+if (collections.Contains(collectionName))
 {
+    Console.WriteLine("Found database");
+}
+else
+{
+    using HttpClient client = new();
     string s = await client.GetStringAsync("https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7");
     List<string> paragraphs =
         TextChunker.SplitPlainTextParagraphs(
@@ -56,13 +64,13 @@ using (HttpClient client = new())
                 WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", "")),
                 128),
             1024);
-    for (int i = 0; i < paragraphs.Count; i++)
-    {
-        Console.WriteLine($"Saving paragraph {i} of {paragraphs.Count}");
+    for (int i = 0; i < paragraphs.Count; i++){
         // sleep for a bit to avoid rate limiting
         await Task.Delay(TimeSpan.FromSeconds(3)); 
         await memory.SaveInformationAsync(collectionName, paragraphs[i], $"paragraph{i}");
     }
+        
+    Console.WriteLine("Generated database");
 }
 
 // Create a new chat
@@ -79,6 +87,7 @@ while (true)
     builder.Clear();
     await foreach (var result in memory.SearchAsync(collectionName, question, limit: 3))
         builder.AppendLine(result.Metadata.Text);
+
     int contextToRemove = -1;
     if (builder.Length != 0)
     {
