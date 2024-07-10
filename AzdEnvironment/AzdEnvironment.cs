@@ -1,20 +1,22 @@
 ﻿using DotNetEnv;
 using Newtonsoft.Json.Linq;
 
-namespace LoadEnvVariables;
+namespace AzdLibrary;
 
-public class AzureEnvManager
+public static class AzdEnvironment
 {
-    private const string ConfigFilePath = "../../.azure/config.json";
+    private const string AzureFolderPath = "../../.azure";
 
-    public string GetDefaultEnvironment()
+    public static string GetDefaultEnvironment()
     {
-        if (!File.Exists(ConfigFilePath))
+        var configFilePath = Path.Combine(AzureFolderPath, "config.json");
+
+        if (!File.Exists(configFilePath))
         {
-            throw new FileNotFoundException($"The config file was not found: {ConfigFilePath}");
+            throw new FileNotFoundException($"The config file was not found: {configFilePath}");
         }
 
-        var jsonData = File.ReadAllText(ConfigFilePath);
+        var jsonData = File.ReadAllText(configFilePath);
         var config = JObject.Parse(jsonData);
         var defaultEnvironment = config["defaultEnvironment"]?.ToString();
 
@@ -26,10 +28,10 @@ public class AzureEnvManager
         return defaultEnvironment;
     }
 
-    public string GetEnvFilePath()
+    public static string GetEnvFilePath()
     {
         var defaultEnvironment = GetDefaultEnvironment();
-        var envFilePath = Path.Combine("../../.azure", defaultEnvironment, ".env");
+        var envFilePath = Path.Combine(AzureFolderPath, defaultEnvironment, ".env");
 
         if (!File.Exists(envFilePath))
         {
@@ -39,7 +41,7 @@ public class AzureEnvManager
         return envFilePath;
     }
 
-    public void LoadEnvVariables()
+    public static void LoadEnvVariables()
     {
         var envFilePath = GetEnvFilePath();
         Env.Load(envFilePath);

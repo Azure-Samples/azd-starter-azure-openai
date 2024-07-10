@@ -3,11 +3,10 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using LoadEnvVariables;
+using AzdLibrary;
 
 // Read the environment variable
-var env = new AzureEnvManager();
-env.LoadEnvVariables();
+AzdEnvironment.LoadEnvVariables();
 
 string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
 

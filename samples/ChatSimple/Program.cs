@@ -1,9 +1,8 @@
 ﻿using Microsoft.SemanticKernel;
-using LoadEnvVariables;
+using AzdLibrary;
 
 // Read the environment variable
-var env = new AzureEnvManager();
-env.LoadEnvVariables();
+AzdEnvironment.LoadEnvVariables();
 
 string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
 

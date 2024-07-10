@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\LoadEnvVariables\LoadEnvVariables.csproj" />
+    <ProjectReference Include="..\..\AzdEnvironment\AzdEnvironment.csproj" />
   </ItemGroup>
 
 </Project>

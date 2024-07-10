@@ -8,13 +8,12 @@ using Microsoft.SemanticKernel.Text;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using LoadEnvVariables;
+using AzdLibrary;
 
 #pragma warning disable SKEXP0001, SKEXP0003, SKEXP0010, SKEXP0050, SKEXP0055 // Experimental
 
 // Read the environment variable
-var env = new AzureEnvManager();
-env.LoadEnvVariables();
+AzdEnvironment.LoadEnvVariables();
 
 string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
 

@@ -1,12 +1,11 @@
 ﻿using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Numerics.Tensors;
-using LoadEnvVariables;
+using AzdLibrary;
 
 #pragma warning disable SKEXP0010
 
 // Read the environment variable
-var env = new AzureEnvManager();
-env.LoadEnvVariables();
+AzdEnvironment.LoadEnvVariables();
 
 
 string OPENAI_HOST = Environment.GetEnvironmentVariable("OPENAI_HOST")!;
