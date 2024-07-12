@@ -8,11 +8,11 @@ hooks:
   postprovision:
     posix: 
       shell: sh
-      run: infra\hooks\postprovision.sh
+      run: infra/hooks/postprovision.sh
       interactive: true
       continueOnError: false
     windows:
       shell: pwsh
-      run: infra\hooks\postprovision.ps1
+      run: infra/hooks/postprovision.ps1
       interactive: true
       continueOnError: false
