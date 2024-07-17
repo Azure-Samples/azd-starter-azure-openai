@@ -5,7 +5,7 @@ namespace AzdLibrary;
 
 public static class AzdEnvironment
 {
-    private const string AzureFolderPath = "../../.azure";
+    private const string AzureFolderPath = "../../../.azure";
 
     public static string GetDefaultEnvironment()
     {
