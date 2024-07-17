@@ -38,10 +38,10 @@ Select your desired `subscription` and `location`. Wait a moment for the resourc
 **Note**: Make sure to pick a region where all services are available like, for example, *East US 2*
 
 ## How to run samples.
-Select any sample you want to run.
+Select any sample you want to run. Such as `01_ChatSimple`:
 
 ```bash
-cd src/samples/...
+cd src/samples/01_ChatSimple
 
 dotnet run
 ```
