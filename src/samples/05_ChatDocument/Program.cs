@@ -43,13 +43,21 @@ while (true)
     chat.AddUserMessage(Console.ReadLine()!);
 
     builder.Clear();
-    await foreach (var message in ai.GetStreamingChatMessageContentsAsync(chat))
+    try
     {
-        Console.Write(message);
-        builder.Append(message.Content);
-    }
-    Console.WriteLine();
-    chat.AddAssistantMessage(builder.ToString());
+        await foreach (var message in ai.GetStreamingChatMessageContentsAsync(chat))
+        {
+            Console.Write(message);
+            builder.Append(message.Content);
+        }
 
-    Console.WriteLine();
+        Console.WriteLine();
+        chat.AddAssistantMessage(builder.ToString());
+
+        Console.WriteLine();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"It's an expected error: {ex.Message}");
+    }
 }

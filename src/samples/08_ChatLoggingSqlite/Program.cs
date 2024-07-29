@@ -63,7 +63,11 @@ else
                 WebUtility.HtmlDecode(Regex.Replace(s, @"<[^>]+>|&nbsp;", "")),
                 128),
             1024);
-    for (int i = 0; i < paragraphs.Count; i++){
+    // Since the default sku of OpenAI is S0, only the first five paragraphs are loaded here.
+    // If you want to load all paragraphs, please create a higher level sku OpenAI.
+    // for (int i = 0; i < paragraphs.Count; i++)
+    for (int i = 0; i < 5; i++)
+    {
         // sleep for a bit to avoid rate limiting
         await Task.Delay(TimeSpan.FromSeconds(3)); 
         await memory.SaveInformationAsync(collectionName, paragraphs[i], $"paragraph{i}");
@@ -79,7 +83,8 @@ StringBuilder builder = new();
 
 // Q&A loop
 while (true)
-{
+{   
+    Console.WriteLine("Since the default sku of OpenAI is S0, only the first five paragraphs are loaded here. If you want to load all paragraphs, please create a higher level sku OpenAI.");
     Console.Write("Question: ");
     string question = Console.ReadLine()!;
 
