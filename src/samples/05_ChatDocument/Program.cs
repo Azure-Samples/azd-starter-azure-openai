@@ -59,5 +59,6 @@ while (true)
     catch (Exception ex)
     {
         Console.WriteLine($"It's an expected error: {ex.Message}");
+        break;
     }
 }

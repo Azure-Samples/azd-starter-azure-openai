@@ -15,6 +15,12 @@ Make sure AZD CLI can access Azure resources. You can use the following command 
 azd auth login
 ```
 
+Make sure AZ CLI can access Azure resources (in hooks). You can use the following command to log in to Azure:
+
+```bash
+az login
+```
+
 ## Initialize the template
 
 Then, execute the `azd init` command to initialize the environment (You do not need to run this command if you already have the code or have opened this in a Codespace or DevContainer).
@@ -46,3 +52,14 @@ cd src/samples/01_ChatSimple
 dotnet run
 ```
 Typing out questions and getting answers back from the service.
+
+**Notes:** 
+- For sample `07_ChatLogging` and `08_ChatLoggingSqlLite`, since the default sku of `OpenAI` is `S0`, only the first five paragraphs are loaded. If you want to load all paragraphs, please create a higher level sku OpenAI.
+
+```csharp
+// for (int i = 0; i < paragraphs.Count; i++)
+for (int i = 0; i < 5; i++)
+{
+    await memory.SaveInformationAsync(collectionName, paragraphs[i], $"paragraph{i}");
+}
+```
