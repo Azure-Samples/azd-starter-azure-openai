@@ -8,75 +8,84 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
-var tags = { 'azd-env-name': environmentName }
+@description('Azure OpenAi Model Deployment Name')
+param azureOpenAiModel string = 'gpt-35-turbo'
+
+@description('Azure OpenAi Model Name')
+param azureOpenAiModelName string = 'gpt-35-turbo'
+
+param azureOpenAiModelVersion string = '0613'
+
+@description('Azure OpenAi Embedding Model Deployment Name')
+param azureOpenAiEmbeddingModel string = 'text-embedding-ada-002'
+
+@description('Azure OpenAi Embedding Model Name')
+param azureOpenAiEmbeddingModelName string = 'text-embedding-ada-002'
+
+param azureOpenAiEmbeddingModelVersion string = '2'
+
+@allowed(['azure', 'openai'])
+param openAiHost string 
+param openAiModel string = ''
+param openAiEmbeddingModel string = ''
+
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+var tags = { 'azd-env-name': environmentName }
+
 
 // Organize resources in a resource group 
-resource group 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'rg-${environmentName}'
   location: location
   tags: tags
 }
 
-module openAI 'br/public:ai/cognitiveservices:1.1.1' = {
+module openAi 'br/public:avm/res/cognitive-services/account:0.5.3' = {
   name: 'openai'
-  scope: group
+  scope: rg
   params: {
     tags: tags
-    skuName: 'S0'
     kind: 'OpenAI'
     name: 'openai-${resourceToken}'
     location: location
+    disableLocalAuth: false
+    publicNetworkAccess: 'Enabled'
     deployments: [
       {
-        name: 'Gpt35Turbo_0301'
-        properties: {
-          model: {
-            format: 'OpenAI'
-            name: 'gpt-35-turbo'
-            version: '0301'
-          }
+        name: azureOpenAiModelName
+        model: {
+          format: 'OpenAI'
+          name: azureOpenAiModel
+          version: azureOpenAiModelVersion
+        }
+        sku: {
+          capacity: 10
+          name: 'Standard'
         }
       }
       {
-        name: 'TextEmbeddingAda002_1'
-        properties: {
-          model: {
-            format: 'OpenAI'
-            name: 'text-embedding-ada-002'
-            version: '2'
-          }
+        name: azureOpenAiEmbeddingModelName
+        model: {
+          format: 'OpenAI'
+          name: azureOpenAiEmbeddingModel
+          version: azureOpenAiEmbeddingModelVersion
         }
-      }
-      {
-        name: 'Gpt35Turbo_16k'
-        properties: {
-          model: {
-            format: 'OpenAI'
-            name: 'gpt-35-turbo-16k'
-            version: '0613'
-          }
+        sku: {
+          capacity: 10
+          name: 'Standard'
         }
       }
     ]
   }
 }
 
-module searchService 'br/public:search/search-service:1.0.2' = {
-  name: 'search-service'
-  scope: group
-  params: {
-    name: 'search-${resourceToken}'
-    location: location
-    tags: tags
-    sku: {
-      name: 'free'
-    }
-  }
-}
-
 output AZURE_LOCATION string = location
-output AZURE_RESOURCE_GROUP string = group.name
-output AZURE_TENANT_ID string = tenant().tenantId
-output AZURE_OPENAI_ENDPOINT string = openAI.outputs.endpoint
-output AZURE_SEARCH_ENDPOINT string = searchService.outputs.endpoint
+output AZURE_RESOURCE_GROUP string = rg.name
+output OPENAI_HOST string = openAiHost
+output AZURE_OPENAI_ENDPOINT string = (openAiHost == 'azure') ? openAi.outputs.endpoint: ''
+output AZURE_OPENAI_SERVICE string = (openAiHost == 'azure') ? openAi.outputs.name: ''
+output AZURE_OPENAI_MODEL string = (openAiHost == 'azure') ? azureOpenAiModelName: ''
+output AZURE_OPENAI_EMBEDDING_MODEL string = (openAiHost == 'azure') ? azureOpenAiEmbeddingModelName: ''
+
+output OPENAI_MODEL string = (openAiHost == 'openai') ? openAiModel : ''
+output OPENAI_EMBEDDING_MODEL string = (openAiHost == 'openai') ? openAiEmbeddingModel : ''
